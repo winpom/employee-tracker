@@ -1,5 +1,6 @@
 const inquirer = require("inquirer");
 const pool = require('./db/pool.js');
+require('dotenv').config()
 
 // Connect to database
 pool.connect();

@@ -13,9 +13,7 @@ app.use(express.json());
 // Connect to database
 const pool = new Pool(
   db.connect({
-    // TODO: Enter PostgreSQL username
     user: process.env.USER,
-    // TODO: Enter PostgreSQL password
     password: process.env.PASSWORD,
     host: 'localhost',
     database: process.env.DB,
