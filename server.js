@@ -1,5 +1,4 @@
 const express = require('express');
-// Import and require Pool (node-postgres)
 const pool = require('./db/pool.js');
 
 const PORT = process.env.PORT || 3001;
