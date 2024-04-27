@@ -1,8 +1,6 @@
+require('dotenv').config();
 const express = require('express');
-// Import and require Pool (node-postgres)
-// We'll be creating a Connection Pool. Read up on the benefits here: https://node-postgres.com/features/pooling
 const { Pool } = require('pg');
-const db = require('db');
 
 const app = express();
 
@@ -12,13 +10,13 @@ app.use(express.json());
 
 // Connect to database
 const pool = new Pool(
-  db.connect({
-    user: process.env.USER,
-    password: process.env.PASSWORD,
-    host: 'localhost',
-    database: process.env.DB,
-    port: process.env.PORT,
-  }),
+  {
+  user: process.env.USER,
+  password: process.env.PASSWORD,
+  host: 'localhost',
+  database: process.env.DB,
+  port: process.env.PORT,
+  },
   console.log(`Connected to the employees_db database.`)
 )
 
@@ -66,23 +64,22 @@ const updateRole = async (role_id) => {
 };
 
 const departmentChoices = async () => {
-  const departmentQuery = `SELECT id AS value, name FROM department;`;
-  const departments = await connection.query(departmentQuery);
-  return departments[0];
+  const departmentQuery = `SELECT id AS value, name FROM department`;
+  const departments = await pool.query(departmentQuery);
+  return departments.rows;
 };
 
 const roleChoices = async () => {
-  const roleQuery = `SELECT id AS value, name FROM roles;`;
-  const roles = await connection.query(roleQuery);
-  return roles[0];
+  const roleQuery = `SELECT id AS value, name FROM roles`;
+  const roles = await pool.query(roleQuery);
+  return roles.rows;
 };
 
 const employeeChoices = async () => {
-  const employeeQuery = `SELECT id AS value, name FROM employees;`;
-  const employees = await connection.query(employeeQuery);
-  return employees[0];
+  const employeeQuery = `SELECT id AS value, name FROM employees`;
+  const employees = await pool.query(employeeQuery);
+  return employees.rows;
 };
-
 
 module.exports = {
   readDepartments,
@@ -94,7 +91,6 @@ module.exports = {
   updateRole,
   departmentChoices,
   roleChoices,
-  employeeChoices
+  employeeChoices,
+  pool,
 };
-
-module.exports = pool

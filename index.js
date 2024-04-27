@@ -1,5 +1,4 @@
 const inquirer = require("inquirer");
-const pool = require('./db/pool.js');
 const { readDepartments,
     createDepartment,
     readRoles,
@@ -9,14 +8,14 @@ const { readDepartments,
     updateRole,
     departmentChoices,
     roleChoices,
-    employeeChoices } = require('./db/pool');
-require('dotenv').config()
+    employeeChoices,
+    pool } = require('./db/pool');
 
 // Connect to database
 pool.connect();
 
 // Main Options
-const mainOptions = {
+const mainMenuOptions = {
     'View all employees': readEmployees,
     'Add an employee': createEmployee,
     'Update an employee role': updateRole,
@@ -36,7 +35,7 @@ const actions = {
             const employees = await readEmployees();
             console.log("Employee List:");
             console.table(employees);
-            await init();
+            await mainMenu();
         } catch (error) {
             console.error('Error:', error);
         }
@@ -71,7 +70,7 @@ const actions = {
 
             await createEmployee(employeeInfo.firstName, employeeInfo.lastName, employeeInfo.roleId, employeeInfo.managerId);
             console.log("Employee added successfully!");
-            await init();
+            await mainMenu();
         } catch (error) {
             console.error('Error:', error);
         }
@@ -96,7 +95,7 @@ const actions = {
 
             await updateRole(roleInfo.roleUpdate, roleInfo.assignRole,);
             console.log("Role updated successfully!");
-            await init();
+            await mainMenu();
         } catch (error) {
             console.error('Error:', error);
         }
@@ -107,7 +106,7 @@ const actions = {
             const roles = await readRoles();
             console.log("Role List:");
             console.table(roles);
-            await init();
+            await mainMenu();
         } catch (error) {
             console.error('Error:', error);
         }
@@ -136,7 +135,7 @@ const actions = {
 
             await createRole(newRoleInfo.roleName, newRoleInfo.roleSalary, newRoleInfo.roleDept);
             console.log("Role added successfully!");
-            await init();
+            await mainMenu();
         } catch (error) {
             console.error('Error:', error);
         }
@@ -147,7 +146,7 @@ const actions = {
             const departments = await readDepartments();
             console.log("Department List:");
             console.table(departments);
-            await init();
+            await mainMenu();
         } catch (error) {
             console.error('Error:', error);
         }
@@ -165,7 +164,7 @@ const actions = {
 
             await createDepartment(deptInfo.departmentName);
             console.log("Department added successfully!");
-            await init();
+            await mainMenu();
         } catch (error) {
             console.error('Error:', error);
         }
@@ -173,24 +172,44 @@ const actions = {
 };
 
 
-async function init() {
+async function mainMenu() {
     console.log(`
-    _____ __  __ ____  _     _____   _______ _____   __  __    _    _   _    _    ____ _____ ____  
-    | ____|  \/  |  _ \| |   / _ \ \ / / ____| ____| |  \/  |  / \  | \ | |  / \  / ___| ____|  _ \ 
-    |  _| | |\/| | |_) | |  | | | \ V /|  _| |  _|   | |\/| | / _ \ |  \| | / _ \| |  _|  _| | |_) |
-    | |___| |  | |  __/| |__| |_| || | | |___| |___  | |  | |/ ___ \| |\  |/ ___ \ |_| | |___|  _ < 
-    |_____|_|  |_|_|   |_____\___/ |_| |_____|_____| |_|  |_/_/   \_\_| \_/_/   \_\____|_____|_| \_\
-                                                                                                    
-    `)
-    const { action } = await inquirer.prompt([
-        {
-            type: 'list',
-            name: 'action',
-            message: 'What would you like to do?',
-            choices: [mainOptions]
+    ███████ ███    ███ ██████  ██       ██████  ██    ██ ███████ ███████     
+    ██      ████  ████ ██   ██ ██      ██    ██  ██  ██  ██      ██          
+    █████   ██ ████ ██ ██████  ██      ██    ██   ████   █████   █████       
+    ██      ██  ██  ██ ██      ██      ██    ██    ██    ██      ██          
+    ███████ ██      ██ ██      ███████  ██████     ██    ███████ ███████     
+                                                                             
+                                                                             
+    ███    ███  █████  ███    ██  █████   ██████  ███████ ██████             
+    ████  ████ ██   ██ ████   ██ ██   ██ ██       ██      ██   ██            
+    ██ ████ ██ ███████ ██ ██  ██ ███████ ██   ███ █████   ██████             
+    ██  ██  ██ ██   ██ ██  ██ ██ ██   ██ ██    ██ ██      ██   ██            
+    ██      ██ ██   ██ ██   ████ ██   ██  ██████  ███████ ██   ██            
+                                                                                                                                                                                                          
+    `);
+    let exit = false;
+    while (!exit) {
+        try {
+            const { action } = await inquirer.prompt([
+                {
+                    type: 'list',
+                    name: 'action',
+                    message: 'What would you like to do?',
+                    choices: Object.keys(mainMenuOptions)
+                }
+            ]);
+
+            if (action === 'Exit') {
+                exit = true; // Exit the loop if the user chooses to exit
+            } else {
+                await actions[action](); // Execute the selected action
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            // Handle the error gracefully and continue with the loop
         }
-    ]);
-    await actions[action]();
+    }
 }
 
-init();
+mainMenu();
