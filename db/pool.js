@@ -17,7 +17,7 @@ const pool = new Pool(
     password: process.env.PASSWORD,
     host: 'localhost',
     database: process.env.DB,
-    port: process.env.PORT;
+    port: process.env.PORT,
   }),
   console.log(`Connected to the employees_db database.`)
 )
@@ -28,7 +28,7 @@ const readDepartments = async () => {
   return rows;
 };
 
-const addDepartment = async (name) => {
+const createDepartment = async (name) => {
   const query = `INSERT INTO departments (name) VALUES ('Department Name')`;
   await pool.query(query, [name]);
 };
@@ -65,15 +65,36 @@ const updateRole = async (role_id) => {
   await pool.query(query, [role_id]);
 };
 
+const departmentChoices = async () => {
+  const departmentQuery = `SELECT id AS value, name FROM department;`;
+  const departments = await connection.query(departmentQuery);
+  return departments[0];
+};
+
+const roleChoices = async () => {
+  const roleQuery = `SELECT id AS value, name FROM roles;`;
+  const roles = await connection.query(roleQuery);
+  return roles[0];
+};
+
+const employeeChoices = async () => {
+  const employeeQuery = `SELECT id AS value, name FROM employees;`;
+  const employees = await connection.query(employeeQuery);
+  return employees[0];
+};
+
+
 module.exports = {
   readDepartments,
-  addDepartment,
+  createDepartment,
   readRoles,
   createRole,
   readEmployees,
   createEmployee,
   updateRole,
+  departmentChoices,
+  roleChoices,
+  employeeChoices
 };
-
 
 module.exports = pool
