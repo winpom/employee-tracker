@@ -7,7 +7,7 @@ const readDepartments = async () => {
   };
   
   const createDepartment = async (name) => {
-    const query = `INSERT INTO departments (name) VALUES ('Department Name')`;
+    const query = `INSERT INTO departments (name) VALUES ('name')`;
     await pool.query(query, [name]);
   };
   
