@@ -4,6 +4,8 @@
 
 The Employee Tracker is a comprehensive tool for managing employee data within an organization. It allows users to perform various tasks related to employee management, including viewing, adding, updating, and deleting employee information.
 
+[!Video of the application in action](URL.com)
+
 ## Features
 
 - **View Employees**: Users can view a list of all employees within the organization.

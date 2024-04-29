@@ -11,12 +11,12 @@ VALUES ('God', 999999999999, 2),
        ('Janitor', 54000, 3),
        ('Secret Agent', 36, 1);
 
-INSERT INTO employees (first_name, last_name, role_id)
-VALUES ('Jeffrey', 'Bezos', 4),
-       ('Walter', 'White', 2),
-       ('Timothy', 'Apple', 4),
-       ('Jon', 'Snow', 5),
-       ('The', 'Hulk', 1),
-       ('Hakuna', 'Matata', 3),
-       ('Weird', 'Al', 1);
+INSERT INTO employees (first_name, last_name, role_id, manager_id)
+VALUES ('Jeffrey', 'Bezos', 4, 7),
+       ('Walter', 'White', 2, null),
+       ('Timothy', 'Apple', 4, 5),
+       ('Jon', 'Snow', 5, null),
+       ('The', 'Hulk', 1, null),
+       ('Hakuna', 'Matata', 3, null),
+       ('Weird', 'Al', 1, null);
        
