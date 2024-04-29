@@ -49,24 +49,32 @@ async function readRoles() {
 
 async function createRole() {
   try {
-    const newRoleInfo = await inquirer.prompt([
-      {
-        type: "input",
-        message: "What is the name of the role?",
-        name: "roleName",
-      },
-      {
-        type: "input",
-        message: "What is the salary of the role?",
-        name: "roleSalary",
-      },
-      {
-        type: "list",
-        message: "What department does the role belong to?",
-        name: "roleDept",
-        choices: await departmentChoices(),
-      },
-    ]);
+    const deptQuery = 'SELECT id, name FROM departments';
+    const deptResult = await pool.query(deptQuery);
+    const deptChoices = deptResult.rows.map((row) => ({
+      name: row.name,
+      value: row.id
+    }));
+
+    questions = [      {
+      type: "input",
+      message: "What is the name of the role?",
+      name: "roleName",
+    },
+    {
+      type: "input",
+      message: "What is the salary of the role?",
+      name: "roleSalary",
+    },
+    {
+      type: "list",
+      message: "What department does the role belong to?",
+      name: "roleDept",
+      choices: deptChoices,
+    },
+    ]
+
+    const newRoleInfo = await inquirer.prompt(questions);
 
     const { roleName, roleSalary, roleDept } = newRoleInfo;
 
@@ -109,7 +117,6 @@ async function readEmployees() {
 
 async function createEmployee() {
   try {
-    // Fetch manager choices
     const managerQuery = `SELECT id, CONCAT(employees.first_name, ' ', employees.last_name) AS manager_name FROM employees`;
     const managerResult = await pool.query(managerQuery);
     if (managerResult.rows.length === 0) {
@@ -125,7 +132,6 @@ async function createEmployee() {
       }))
     ];
 
-    // Fetch role choices
     const roleQuery = 'SELECT id, title FROM roles';
     const roleResult = await pool.query(roleQuery);
     const roleChoices = roleResult.rows.map((row) => ({
