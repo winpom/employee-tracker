@@ -89,7 +89,31 @@ async function readEmployees() {
 
 async function createEmployee() {
   try {
-    const employeeInfo = await inquirer.prompt([
+    // Fetch manager choices
+    const managerQuery = `SELECT id, CONCAT(employees.first_name, ' ', employees.last_name) AS manager_name FROM employees`;
+    const managerResult = await pool.query(managerQuery);
+    if (managerResult.rows.length === 0) {
+      console.log("There are no managers available. Please add managers before adding employees.");
+      mainMenu();
+      return;
+    }
+    const employeeChoices = [
+      { name: 'None', value: null },
+      ...managerResult.rows.map((row) => ({
+        name: row.manager_name,
+        value: row.id
+      }))
+    ];
+
+    // Fetch role choices
+    const roleQuery = 'SELECT id, title FROM roles';
+    const roleResult = await pool.query(roleQuery);
+    const roleChoices = roleResult.rows.map((row) => ({
+      name: row.title,
+      value: row.id
+    }));
+
+    const questions = [
       {
         type: "input",
         message: "What is the employee's first name?",
@@ -104,76 +128,81 @@ async function createEmployee() {
         type: "list",
         message: "What is the employee's role?",
         name: "roleId",
-        choices: await roleChoices(),
+        choices: roleChoices,
       },
       {
         type: "list",
         message: "Who is the employee's manager?",
         name: "managerId",
-        choices: await employeeChoices(),
+        choices: employeeChoices,
       }
-    ]);
+    ];
+
+    const employeeInfo = await inquirer.prompt(questions);
 
     const { firstName, lastName, roleId, managerId } = employeeInfo;
 
     const query = `
-          INSERT INTO employees (first_name, last_name, role_id, manager_id) 
-          VALUES ($1, $2, $3, $4)
-      `;
+      INSERT INTO employees (first_name, last_name, role_id, manager_id) 
+      VALUES ($1, $2, $3, $4)
+    `;
     await pool.query(query, [firstName, lastName, roleId, managerId]);
 
     console.log("Employee added successfully!");
   } catch (error) {
     console.error('Error:', error);
-  }
+  } 
 }
 
 async function updateRole() {
   try {
-    const roleInfo = await inquirer.prompt([
+    // Fetch employee choices
+    const employeeQuery = `SELECT id, CONCAT(employees.first_name, ' ', employees.last_name) AS employee_name FROM employees`;
+    const employeeResult = await pool.query(employeeQuery);
+    const employeeChoices = employeeResult.rows.map((row) => ({
+      name: row.employee_name,
+      value: row.id
+    }));
+
+    // Fetch role choices
+    const roleQuery = 'SELECT id, title FROM roles';
+    const roleResult = await pool.query(roleQuery);
+    const roleChoices = roleResult.rows.map((row) => ({
+      name: row.title,
+      value: row.id
+    }));
+
+    const questions = [
       {
         type: "list",
         message: "Which employee's role would you like to update?",
         name: "roleUpdate",
-        choices: await employeeChoices(),
+        choices: employeeChoices,
       },
       {
         type: "list",
         message: "Which role would you like to assign to the selected employee?",
         name: "assignRole",
-        choices: await roleChoices(),
+        choices: roleChoices,
       },
-    ]);
+    ];
+
+    const roleInfo = await inquirer.prompt(questions);
+
     const { roleUpdate, assignRole } = roleInfo;
+
     const query = `
-          UPDATE employees
-          SET role_id = $1
-          WHERE id = $2;
-      `;
+      UPDATE employees
+      SET role_id = $1
+      WHERE id = $2;
+    `;
     await pool.query(query, [assignRole, roleUpdate]);
+
     console.log("Role updated successfully!");
   } catch (error) {
     console.error('Error:', error);
   }
 }
-
-const departmentChoices = async () => {
-  const departmentQuery = `SELECT id AS value, name FROM departments`;
-  const departments = await pool.query(departmentQuery);
-  return departments.rows;
-};
-
-const roleChoices = async () => {
-  const roleQuery = `SELECT id AS value, name FROM roles`;
-  const roles = await pool.query(roleQuery);
-  return roles.rows;
-};
-
-const employeeChoices = async () => {
-  const employeeQuery = `SELECT id AS value, name FROM employees`;
-  const employees = await pool.query(employeeQuery);
-  return employees.rows;
-};
 
 module.exports = {
   readDepartments,
