@@ -32,7 +32,13 @@ async function createDepartment() {
 
 async function readRoles() {
   try {
-    const query = 'SELECT * FROM roles';
+    const query = `SELECT 
+    roles.id,
+    roles.title,
+    roles.salary,
+    departments.name AS department
+    FROM roles
+    JOIN departments ON roles.department_id = departments.id;`;
     const { rows } = await pool.query(query);
     console.log("Role List:");
     console.table(rows);
@@ -78,7 +84,21 @@ async function createRole() {
 
 async function readEmployees() {
   try {
-    const query = 'SELECT * FROM employees';
+    const query = `SELECT 
+    employees.id,
+    employees.first_name,
+    employees.last_name,
+    roles.title, 
+    departments.name AS department,
+    roles.salary,
+    CONCAT(manager.first_name,' ',manager.last_name) AS manager_name
+    FROM departments
+    JOIN roles
+    ON departments.id=roles.department_id
+    JOIN employees
+    ON roles.id=employees.role_id
+    LEFT JOIN employees manager
+    ON employees.manager_id=manager.id;`;
     const { rows } = await pool.query(query);
     console.log("Employee List:");
     console.table(rows);
@@ -151,7 +171,7 @@ async function createEmployee() {
     console.log("Employee added successfully!");
   } catch (error) {
     console.error('Error:', error);
-  } 
+  }
 }
 
 async function updateRole() {
